@@ -136,6 +136,13 @@ function App() {
             onOpenFile={triggerFileUpload}
           />
         </div>
+
+        {/* File Name Display */}
+        {file && (
+          <div className="mt-2 text-xs text-white/30 font-mono tracking-widest text-center max-w-2xl truncate px-4">
+            {file.name}
+          </div>
+        )}
       </main>
 
       <ControlDeck 
