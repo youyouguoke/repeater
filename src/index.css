@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: #0F172A;
+  color: white;
+  font-family: 'Roboto', system-ui, sans-serif;
+  overflow: hidden; /* Prevent scrolling for SPA feel */
+}
+
+@keyframes slogan-shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+  background-image: linear-gradient(90deg, #8B5CF6 0%, #60A5FA 50%, #F472B6 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: slogan-shine 6s linear infinite;
+}
+
+.neon-glow {
+  filter: drop-shadow(0 0 8px rgba(139,92,246,0.6)) drop-shadow(0 0 16px rgba(96,165,250,0.5));
+}
+
+/* --- WaveSurfer Region Customization --- */
+
+/* Ensure the region element allows handles to overflow (stick out) */
+[part*="region"] {
+  overflow: visible !important;
+  z-index: 10;
+}
+
+/* Target handles by part attribute AND cursor style as a backup */
+[part*="region-handle"],
+div[style*="cursor: ew-resize"],
+div[style*="cursor:ew-resize"] {
+  width: 12px !important; /* Medium touch target */
+  background-color: transparent !important;
+  z-index: 20 !important;
+  pointer-events: auto !important;
+  border: none !important;
+}
+
+/* Center the handles on the region boundaries */
+[part*="region-handle-left"],
+div[style*="cursor: ew-resize"][style*="left: 0"],
+div[style*="cursor: ew-resize"][style*="left:0"] {
+  transform: translateX(-50%);
+}
+
+[part*="region-handle-right"],
+div[style*="cursor: ew-resize"][style*="right: 0"],
+div[style*="cursor: ew-resize"][style*="right:0"] {
+  transform: translateX(50%);
+}
+
+/* Visual Handle Line */
+[part*="region-handle"]::before,
+div[style*="cursor: ew-resize"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background-color: #ffffff;
+  transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+  transition: all 0.2s ease;
+  z-index: 21;
+}
+
+/* Visual Handle Knob (Grabber) */
+[part*="region-handle"]::after,
+div[style*="cursor: ew-resize"]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px; /* Visible width */
+  height: 24px; /* Visible height */
+  background-color: #FACC15; /* Bright Yellow */
+  border-radius: 4px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transition: all 0.2s ease;
+  z-index: 22;
+}
+
+/* Hover/Active states */
+[part*="region-handle"]:hover::before,
+div[style*="cursor: ew-resize"]:hover::before {
+  background-color: #FDE047;
+  width: 3px;
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.8);
+}
+
+[part*="region-handle"]:hover::after,
+div[style*="cursor: ew-resize"]:hover::after {
+  background-color: #EAB308;
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
+}
