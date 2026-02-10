@@ -601,6 +601,10 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
                ref={mediaRef} 
                className="max-w-full max-h-full rounded-lg shadow-lg bg-black block object-contain"
                playsInline
+               webkit-playsinline="true"
+               x5-video-player-type="h5"
+               x5-video-player-fullscreen="true"
+               x5-playsinline="true"
                preload="metadata"
                onError={(e) => {
                  const target = e.nativeEvent?.target;
