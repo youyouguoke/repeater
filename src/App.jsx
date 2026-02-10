@@ -95,7 +95,7 @@ function App() {
         className="hidden" 
       />
 
-      <main className="flex-1 flex flex-col justify-center items-center relative w-full max-w-3xl mx-auto px-0 pb-80 pt-20 overflow-hidden">
+      <main className="flex-1 flex flex-col justify-center items-center relative w-full max-w-3xl mx-auto px-0 pb-96 pt-20 overflow-hidden">
         
         
         {/* Time Display - Floating above waveform */}
@@ -139,7 +139,7 @@ function App() {
 
         {/* File Name Display */}
         {file && (
-          <div className="mt-2 text-xs text-white/30 font-mono tracking-widest text-center max-w-2xl truncate px-4">
+          <div className="mt-4 text-xs text-white/30 font-mono tracking-widest text-center max-w-2xl truncate px-4 z-10 relative">
             {file.name}
           </div>
         )}
