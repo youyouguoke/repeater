@@ -342,7 +342,7 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
              try {
                // Use standard load method (v7 API)
                // Pass file blob to avoid fetching if possible, though WaveSurfer might still decode
-               await wavesurfer.current.load(globalActiveUrl, file); 
+               await wavesurfer.current.load(globalActiveUrl); 
              } catch (err) {
                console.warn("WaveSurfer load error (likely benign in Strict Mode):", err);
                // Retry logic for genuine aborts that are not just rapid file switches
