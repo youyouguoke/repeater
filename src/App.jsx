@@ -139,7 +139,7 @@ function App() {
 
         {/* File Name Display */}
         {file && (
-          <div className="mt-4 text-xs text-white/30 font-mono tracking-wider text-center max-w-[90%] break-words px-4 z-10 relative">
+          <div className="mt-4 text-xs text-white/30 font-mono tracking-wider text-center max-w-[90%] break-words px-4 z-10 relative select-text cursor-text">
             {file.name.replace(/\.[^/.]+$/, "")}
           </div>
         )}

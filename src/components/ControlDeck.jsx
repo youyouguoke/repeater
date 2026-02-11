@@ -34,7 +34,10 @@ const ControlDeck = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-6 bg-gray-900/60 backdrop-blur-xl border-t border-gray-800 rounded-t-3xl shadow-2xl z-20 pb-14">
+    <div 
+      className="fixed bottom-0 left-0 right-0 p-6 bg-gray-900/60 backdrop-blur-xl border-t border-gray-800 rounded-t-3xl shadow-2xl z-20"
+      style={{ paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
+    >
       
       {/* Row 2: Hero Controls & Settings */}
       <div className="flex items-center justify-between mb-8 mt-2 px-2">

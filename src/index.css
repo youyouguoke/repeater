@@ -12,6 +12,10 @@ body {
   color: white;
   font-family: 'Roboto', system-ui, sans-serif;
   overflow: hidden; /* Prevent scrolling for SPA feel */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+  -webkit-touch-callout: none; /* Disable long-press menu */
+  -webkit-user-select: none; /* Disable text selection */
+  user-select: none;
 }
 
 @keyframes slogan-shine {
