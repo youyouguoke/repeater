@@ -73,6 +73,8 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
     const regions = RegionsPlugin.create();
     regionsPlugin.current = regions;
 
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     const options = {
       container: containerRef.current,
       waveColor: '#334155',
@@ -83,8 +85,8 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
       barRadius: 2,
       height: 100,
       normalize: true,
-      // Lower sample rate for videos to speed up waveform generation (decoding/rendering)
-      sampleRate: isVideo ? 3000 : 8000, 
+      // Lower sample rate for videos/mobile to speed up waveform generation
+      sampleRate: isVideo ? (isMobile ? 100 : 3000) : 8000, 
       plugins: [regions],
     };
 
@@ -338,8 +340,9 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
              }
 
              try {
-               // Use internal loadAudio to pass BOTH url (for src stability) and blob (to avoid fetch)
-               await wavesurfer.current.loadAudio(globalActiveUrl, file);
+               // Use standard load method (v7 API)
+               // Pass file blob to avoid fetching if possible, though WaveSurfer might still decode
+               await wavesurfer.current.load(globalActiveUrl, file); 
              } catch (err) {
                console.warn("WaveSurfer load error (likely benign in Strict Mode):", err);
                // Retry logic for genuine aborts that are not just rapid file switches
