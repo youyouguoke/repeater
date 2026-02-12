@@ -629,14 +629,17 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
       )}
       {/* Video Player */}
       {isVideo && (
-        <div className="flex-1 min-h-0 w-full mb-4 relative bg-black rounded-lg overflow-hidden shadow-lg">
+        <div className="flex-1 min-h-0 w-full mb-4 relative z-0">
+            {/* Video element needs simple container for X5 compatibility */}
             <video 
                ref={mediaRef} 
-               className="absolute inset-0 w-full h-full"
+               className="absolute inset-0 w-full h-full bg-black"
                style={{ objectFit: 'contain' }}
                playsInline
                webkit-playsinline="true"
                x5-video-player-type="h5"
+               x5-video-orientation="landscape|portrait"
+               x5-playsinline="true"
                preload="metadata"
                onError={(e) => {
                  const target = e.nativeEvent?.target;
