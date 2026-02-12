@@ -611,22 +611,22 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
         <div className="absolute inset-0 flex items-center justify-center z-50 p-6 pointer-events-auto">
           <button
             onClick={onOpenFile}
-            className="group relative flex flex-col items-center justify-center w-full max-w-[200px] aspect-square rounded-3xl bg-gray-800/20 hover:bg-gray-800/40 border-2 border-dashed border-gray-700 hover:border-accent/50 transition-all duration-500 ease-out hover:scale-105 active:scale-95"
+            className="group relative flex flex-col items-center justify-center w-full max-w-[140px] md:max-w-[200px] aspect-square rounded-3xl bg-gray-800/20 hover:bg-gray-800/40 border-2 border-dashed border-gray-700 hover:border-accent/50 transition-all duration-500 ease-out hover:scale-105 active:scale-95"
           >
             {/* Glow effect behind */}
             <div className="absolute inset-0 rounded-3xl bg-accent/5 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
             
             {/* Icon Container */}
-            <div className="relative w-20 h-20 mb-6 rounded-2xl bg-gray-900/50 flex items-center justify-center shadow-inner border border-gray-800 group-hover:border-accent/30 transition-colors duration-500">
-               <Upload className="w-8 h-8 text-gray-500 group-hover:text-accent transition-colors duration-300" />
+            <div className="relative w-14 h-14 md:w-20 md:h-20 mb-4 md:mb-6 rounded-2xl bg-gray-900/50 flex items-center justify-center shadow-inner border border-gray-800 group-hover:border-accent/30 transition-colors duration-500">
+               <Upload className="w-6 h-6 md:w-8 md:h-8 text-gray-500 group-hover:text-accent transition-colors duration-300" />
             </div>
 
             {/* Text */}
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-xl font-bold text-gray-300 group-hover:text-white tracking-wide transition-colors">
+            <div className="flex flex-col items-center gap-1 md:gap-2">
+              <span className="text-lg md:text-xl font-bold text-gray-300 group-hover:text-white tracking-wide transition-colors">
                 Open Media
               </span>
-              <span className="text-xs font-medium text-gray-500 group-hover:text-accent/80 uppercase tracking-widest transition-colors">
+              <span className="text-[10px] md:text-xs font-medium text-gray-500 group-hover:text-accent/80 uppercase tracking-widest transition-colors">
                 Audio or Video
               </span>
             </div>
