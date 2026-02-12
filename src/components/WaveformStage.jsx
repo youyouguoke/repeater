@@ -630,14 +630,14 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
       {/* Video Player */}
       {isVideo && (
         <div className="flex-1 min-h-0 w-full mb-4 flex justify-center items-center overflow-hidden">
-          <div className="relative w-fit h-full flex flex-col justify-center">
+          <div className="relative w-full h-full flex flex-col justify-center items-center">
             <video 
                ref={mediaRef} 
-               className="max-w-full max-h-full rounded-lg shadow-lg bg-black block object-contain"
+               className="max-w-full max-h-full rounded-lg shadow-lg bg-black block"
+               style={{ objectFit: 'contain' }}
                playsInline
                webkit-playsinline="true"
                x5-video-player-type="h5"
-               x5-video-player-fullscreen="true"
                x5-playsinline="true"
                preload="metadata"
                onError={(e) => {
