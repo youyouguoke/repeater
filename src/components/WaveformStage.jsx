@@ -86,7 +86,7 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
       height: 100,
       normalize: true,
       // Lower sample rate for videos/mobile to speed up waveform generation
-      sampleRate: isVideo ? (isMobile ? 100 : 3000) : 8000, 
+      sampleRate: isVideo ? (isMobile ? 100 : 3000) : (isMobile ? 1000 : 8000), 
       plugins: [regions],
     };
 
