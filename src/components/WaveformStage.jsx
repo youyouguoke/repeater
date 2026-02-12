@@ -340,9 +340,39 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
              }
 
              try {
-               // Use standard load method (v7 API)
-               // Pass file blob to avoid fetching if possible, though WaveSurfer might still decode
-               await wavesurfer.current.load(globalActiveUrl); 
+               // iOS Video Optimization:
+               // Decoding large video audio tracks via Web Audio API crashes or hangs on iOS.
+               // We skip decoding entirely by providing fake peaks, ensuring playback works.
+               const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+               
+               if (showVideo && isIOS) {
+                  // 1. Force load metadata to get duration
+                  const videoEl = mediaRef.current;
+                  if (!videoEl) throw new Error("Video element missing");
+                  
+                  // If duration is already available, use it
+                  let duration = videoEl.duration;
+                  
+                  if (!Number.isFinite(duration)) {
+                      videoEl.src = globalActiveUrl;
+                      await new Promise((resolve) => {
+                          videoEl.onloadedmetadata = () => resolve();
+                          // Timeout fallback
+                          setTimeout(resolve, 1000);
+                      });
+                      duration = videoEl.duration || 0;
+                  }
+
+                  // 2. Generate fake peaks (flat line or simple noise) to bypass decoding
+                  // WaveSurfer expects array of Float32Array
+                  const peaks = [new Float32Array(100).fill(0.01)]; 
+                  
+                  // 3. Load with pre-defined peaks
+                  await wavesurfer.current.load(globalActiveUrl, peaks, duration);
+               } else {
+                  // Standard load for Desktop/Android
+                  await wavesurfer.current.load(globalActiveUrl); 
+               }
              } catch (err) {
                console.warn("WaveSurfer load error (likely benign in Strict Mode):", err);
                // Retry logic for genuine aborts that are not just rapid file switches
