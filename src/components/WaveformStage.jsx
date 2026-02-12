@@ -637,9 +637,8 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
                style={{ objectFit: 'contain' }}
                playsInline
                webkit-playsinline="true"
-               x5-video-player-type="h5"
-               x5-video-orientation="landscape|portrait"
                x5-playsinline="true"
+               webkit-playsinline="true"
                preload="metadata"
                onError={(e) => {
                  const target = e.nativeEvent?.target;
