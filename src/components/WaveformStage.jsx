@@ -630,6 +630,21 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
       {/* Video Player */}
       {isVideo && (
         <div className="flex-1 min-h-0 w-full mb-4 relative z-0">
+            {/* Force fullscreen styles for Android native browser */}
+            <style>{`
+              video:fullscreen {
+                width: 100vw !important;
+                height: 100vh !important;
+                object-fit: contain !important;
+                background: black !important;
+              }
+              video:-webkit-full-screen {
+                width: 100vw !important;
+                height: 100vh !important;
+                object-fit: contain !important;
+                background: black !important;
+              }
+            `}</style>
             {/* Video element needs simple container for X5 compatibility */}
             <video 
                ref={mediaRef} 
@@ -638,7 +653,6 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
                playsInline
                webkit-playsinline="true"
                x5-playsinline="true"
-               webkit-playsinline="true"
                preload="metadata"
                onError={(e) => {
                  const target = e.nativeEvent?.target;
