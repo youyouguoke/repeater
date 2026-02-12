@@ -354,14 +354,18 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
                   // If duration is already available, use it
                   let duration = videoEl.duration;
                   
-                  if (!Number.isFinite(duration)) {
+                  if (!Number.isFinite(duration) || duration === 0) {
                       videoEl.src = globalActiveUrl;
                       await new Promise((resolve) => {
+                          // If metadata loads, resolve
                           videoEl.onloadedmetadata = () => resolve();
-                          // Timeout fallback
-                          setTimeout(resolve, 1000);
+                          // Timeout fallback - reduce to 500ms for faster feedback
+                          setTimeout(() => {
+                            console.warn("Metadata load timed out");
+                            resolve();
+                          }, 500);
                       });
-                      duration = videoEl.duration || 0;
+                      duration = videoEl.duration || 30; // Default to 30s if still unknown to prevent hang
                   }
 
                   // 2. Generate fake peaks (flat line or simple noise) to bypass decoding
@@ -369,7 +373,9 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
                   const peaks = [new Float32Array(100).fill(0.01)]; 
                   
                   // 3. Load with pre-defined peaks
-                  await wavesurfer.current.load(globalActiveUrl, peaks, duration);
+                  // Ensure duration is strictly positive number
+                  const safeDuration = (Number.isFinite(duration) && duration > 0) ? duration : 30;
+                  await wavesurfer.current.load(globalActiveUrl, peaks, safeDuration);
                } else {
                   // Standard load for Desktop/Android
                   await wavesurfer.current.load(globalActiveUrl); 
@@ -605,7 +611,7 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
         <div className="absolute inset-0 flex items-center justify-center z-50 p-6 pointer-events-auto">
           <button
             onClick={onOpenFile}
-            className="group relative flex flex-col items-center justify-center w-full max-w-[240px] aspect-square rounded-3xl bg-gray-800/20 hover:bg-gray-800/40 border-2 border-dashed border-gray-700 hover:border-accent/50 transition-all duration-500 ease-out hover:scale-105 active:scale-95"
+            className="group relative flex flex-col items-center justify-center w-full max-w-[200px] aspect-square rounded-3xl bg-gray-800/20 hover:bg-gray-800/40 border-2 border-dashed border-gray-700 hover:border-accent/50 transition-all duration-500 ease-out hover:scale-105 active:scale-95"
           >
             {/* Glow effect behind */}
             <div className="absolute inset-0 rounded-3xl bg-accent/5 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
@@ -660,7 +666,13 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
                  const code = err?.code;
                  const msg = err?.message || '';
                  console.error("Video Element Error:", { code, msg });
-                 setShowVideo(false);
+                 
+                 // On iOS, fallback to audio-only decoding causes crashes for large files.
+                 // We prefer to keep video mode even if it fails, or show error.
+                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                 if (!isIOS) {
+                    setShowVideo(false);
+                 }
                }}
             />
             <button 

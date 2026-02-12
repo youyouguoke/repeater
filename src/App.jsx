@@ -95,7 +95,7 @@ function App() {
         className="hidden" 
       />
 
-      <main className="flex-1 flex flex-col justify-center items-center relative w-full max-w-3xl mx-auto px-0 pb-96 pt-20 overflow-hidden">
+      <main className={`flex-1 flex flex-col justify-center items-center relative w-full max-w-3xl mx-auto px-0 pt-20 overflow-hidden ${file ? 'pb-96' : 'pb-0'}`}>
         
         
         {/* Time Display - Floating above waveform */}
@@ -145,25 +145,27 @@ function App() {
         )}
       </main>
 
-      <ControlDeck 
-        isPlaying={isPlaying}
-        playMode={playMode}
-        onLoopPlay={toggleLoopPlay}
-        loopCount={loopCount}
-        currentLoop={currentLoop}
-        onLoopChange={setLoopCount}
-        speed={speed}
-        onSpeedChange={setSpeed}
-        onReplaySegment={() => {
-          waveformRef.current?.replaySegment();
-          setPlayMode('loop');
-          setIsPlaying(true);
-        }}
-        onResetRegion={() => waveformRef.current?.resetRegion()}
-        onFineTune={(type, delta) => waveformRef.current?.fineTune(type, delta)}
-        regionStart={formatTime(regionStart)}
-        regionEnd={formatTime(regionEnd)}
-      />
+      {file && (
+        <ControlDeck 
+          isPlaying={isPlaying}
+          playMode={playMode}
+          onLoopPlay={toggleLoopPlay}
+          loopCount={loopCount}
+          currentLoop={currentLoop}
+          onLoopChange={setLoopCount}
+          speed={speed}
+          onSpeedChange={setSpeed}
+          onReplaySegment={() => {
+            waveformRef.current?.replaySegment();
+            setPlayMode('loop');
+            setIsPlaying(true);
+          }}
+          onResetRegion={() => waveformRef.current?.resetRegion()}
+          onFineTune={(type, delta) => waveformRef.current?.fineTune(type, delta)}
+          regionStart={formatTime(regionStart)}
+          regionEnd={formatTime(regionEnd)}
+        />
+      )}
     </div>
   );
 }
