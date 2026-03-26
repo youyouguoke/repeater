@@ -283,7 +283,16 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
            }
 
            if (loopCountRef.current === Infinity) {
-              // Handled by region.loop = true
+              const now = Date.now();
+              if (now < ignoreRegionOutUntilRef.current) {
+                  return;
+              }
+              if (now - lastLoopTimeRef.current < 200) {
+                  return;
+              }
+              lastLoopTimeRef.current = now;
+              region.play();
+              return;
            } else {
               // Finite loop handling
            const now = Date.now();
