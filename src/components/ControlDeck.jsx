@@ -1,133 +1,166 @@
 import React from 'react';
-import { Pause, RotateCw, RefreshCw, X, Repeat } from 'lucide-react';
+import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 
-const ControlDeck = ({ 
-  isPlaying, 
-  playMode,
+const ControlDeck = ({
+  isPlaying,
   onLoopPlay,
-  loopCount, 
+  loopCount,
   currentLoop = 0,
-  onLoopChange, 
-  speed, 
-  onSpeedChange, 
-  onReplaySegment, 
-  onResetRegion, 
-  onFineTune,
+  onLoopChange,
+  speed,
+  onSpeedChange,
+  onReplaySegment,
+  onResetRegion,
+  onSetStart,
+  onSetEnd,
   regionStart = "00:00.0",
   regionEnd = "00:00.0"
 }) => {
-  
-  const speedOptions = [1.0, 1.25, 1.5, 2.0, 0.5, 0.75];
-  
-  const cycleSpeed = () => {
-    const currentIndex = speedOptions.indexOf(speed);
-    const nextIndex = (currentIndex + 1) % speedOptions.length;
-    onSpeedChange(speedOptions[nextIndex]);
-  };
 
-  const cycleLoop = () => {
-    // Toggle sequence: 3 -> 5 -> 10 -> Infinity
-    if (loopCount === 3) onLoopChange(5);
-    else if (loopCount === 5) onLoopChange(10);
-    else if (loopCount === 10) onLoopChange(Infinity);
-    else onLoopChange(3);
-  };
+  const speedOptions = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+  const loopOptions = [
+    { value: 1, label: '1x' },
+    { value: 5, label: '5x' },
+    { value: 10, label: '10x' },
+    { value: Infinity, label: '∞' }
+  ];
 
   return (
-    <div 
-      className="fixed bottom-0 left-0 right-0 p-6 bg-gray-900/60 backdrop-blur-xl border-t border-gray-800 rounded-t-3xl shadow-2xl z-20"
-      style={{ paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
-    >
-      
-      {/* Row 2: Hero Controls & Settings */}
-      <div className="flex items-center justify-between mb-8 mt-2 px-2">
-        {/* Loop Setting */}
-        <button 
-          onClick={cycleLoop}
-          className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-gray-800/50 hover:bg-gray-700 transition active:scale-95"
-        >
-          <span className="text-xs text-gray-400 mb-1">Loop</span>
-          <span className="text-accent font-bold text-lg">
-            {loopCount === Infinity 
-              ? '∞' 
-              : (isPlaying && playMode === 'loop')
-                ? `${currentLoop + 1}/${loopCount}` 
-                : `${loopCount}x`
-            }
-          </span>
-        </button>
-
-        {/* Loop Play Button */}
-        <button 
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+      {/* Main Controls Row */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <button
           onClick={onLoopPlay}
-          className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition active:scale-95 ${
-            isPlaying && playMode === 'loop' ? 'bg-accent text-white' : 'bg-gray-800 text-white hover:bg-gray-700'
+          className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 ${
+            isPlaying
+              ? 'bg-primary text-on-primary hover:opacity-90'
+              : 'bg-surface-container-high text-on-surface hover:bg-surface-container'
           }`}
         >
-          {isPlaying && playMode === 'loop' ? (
-             <Pause className="w-8 h-8 fill-current" />
+          {isPlaying ? (
+            <Pause className="w-8 h-8 fill-current" />
           ) : (
-             <Repeat className="w-8 h-8" />
+            <Play className="w-8 h-8 fill-current ml-1" />
           )}
         </button>
+      </div>
 
-        {/* Speed Setting */}
-        <button 
-          onClick={cycleSpeed}
-          className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-gray-800/50 hover:bg-gray-700 transition active:scale-95"
+      {/* Loop Range Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="bg-surface-container-low rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">Start</span>
+            <span className="text-xl font-mono font-bold text-on-surface">{regionStart}</span>
+          </div>
+          <button
+            onClick={onSetStart}
+            className="w-full py-2 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-medium hover:bg-surface-container transition-colors"
+          >
+            Set Current
+          </button>
+        </div>
+
+        <div className="bg-surface-container-low rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">End</span>
+            <span className="text-xl font-mono font-bold text-on-surface">{regionEnd}</span>
+          </div>
+          <button
+            onClick={onSetEnd}
+            className="w-full py-2 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-medium hover:bg-surface-container transition-colors"
+          >
+            Set Current
+          </button>
+        </div>
+      </div>
+
+      {/* Loop Count */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">Loop Count</span>
+          {loopCount !== Infinity && isPlaying && (
+            <span className="text-sm font-mono text-primary">
+              {currentLoop + 1}/{loopCount}
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {loopOptions.map((option) => (
+            <button
+              key={option.label}
+              onClick={() => onLoopChange(option.value)}
+              className={`py-2 rounded-lg text-sm font-mono font-medium transition-all ${
+                loopCount === option.value
+                  ? 'bg-primary text-on-primary shadow-sm'
+                  : 'bg-surface-container-high border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Speed Control */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">Speed</span>
+          <span className="text-sm font-mono text-primary">{speed}x</span>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {speedOptions.map((s) => (
+            <button
+              key={s}
+              onClick={() => onSpeedChange(s)}
+              className={`flex-1 py-2 rounded-lg text-sm font-mono font-medium transition-all ${
+                speed === s
+                  ? 'bg-primary text-on-primary shadow-sm'
+                  : 'bg-surface-container-high border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+              }`}
+            >
+              {s}x
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        <button
+          onClick={onReplaySegment}
+          className="flex-1 py-2 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-medium hover:bg-surface-container transition-colors flex items-center justify-center gap-1"
         >
-          <span className="text-xs text-gray-400 mb-1">Speed</span>
-          <span className="text-accent font-bold text-lg">{speed}x</span>
+          <RotateCcw className="w-3.5 h-3.5" />
+          Replay
+        </button>
+        <button
+          onClick={onResetRegion}
+          className="flex-1 py-2 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-medium hover:bg-surface-container transition-colors flex items-center justify-center gap-1"
+        >
+          <SkipBack className="w-3.5 h-3.5" />
+          Reset
         </button>
       </div>
 
-      {/* Row 3: Fine Tune */}
-      <div className="flex justify-between gap-4">
-        {/* Start Control */}
-        <div className="flex-1 bg-gray-800/50 rounded-2xl p-3 flex flex-col items-center justify-center gap-2">
-           <div className="text-xs text-gray-400 font-mono uppercase tracking-wider">Start</div>
-           <div className="text-xl font-bold text-white font-mono">{regionStart}</div>
-           <div className="flex w-full gap-2 mt-1">
-              <button 
-                 onClick={() => onFineTune('start', -0.1)}
-                 className="flex-1 py-2 bg-gray-700/50 rounded-lg text-sm font-bold text-gray-300 hover:bg-gray-600 active:scale-95 transition"
-              >
-                 -0.1s
-              </button>
-              <button 
-                 onClick={() => onFineTune('start', 0.1)}
-                 className="flex-1 py-2 bg-gray-700/50 rounded-lg text-sm font-bold text-gray-300 hover:bg-gray-600 active:scale-95 transition"
-              >
-                 +0.1s
-              </button>
-           </div>
-        </div>
-
-        {/* End Control */}
-        <div className="flex-1 bg-gray-800/50 rounded-2xl p-3 flex flex-col items-center justify-center gap-2">
-           <div className="text-xs text-gray-400 font-mono uppercase tracking-wider">End</div>
-           <div className="text-xl font-bold text-white font-mono">{regionEnd}</div>
-           <div className="flex w-full gap-2 mt-1">
-              <button 
-                 onClick={() => onFineTune('end', -0.1)}
-                 className="flex-1 py-2 bg-gray-700/50 rounded-lg text-sm font-bold text-gray-300 hover:bg-gray-600 active:scale-95 transition"
-              >
-                 -0.1s
-              </button>
-              <button 
-                 onClick={() => onFineTune('end', 0.1)}
-                 className="flex-1 py-2 bg-gray-700/50 rounded-lg text-sm font-bold text-gray-300 hover:bg-gray-600 active:scale-95 transition"
-              >
-                 +0.1s
-              </button>
-           </div>
-        </div>
-      </div>
-
-      {/* Slogan at bottom */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center select-none opacity-80">
-        <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-500 text-center">
-          Practice Makes Perfect, We Make Practice Easy.
+      {/* Keyboard Shortcuts Hint */}
+      <div className="mt-6 pt-4 border-t border-outline-variant">
+        <div className="flex items-center justify-center gap-4 text-xs text-on-surface-variant">
+          <span className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 bg-surface-container border border-outline-variant rounded text-[10px] font-mono">Space</kbd>
+            Play/Pause
+          </span>
+          <span className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 bg-surface-container border border-outline-variant rounded text-[10px] font-mono">A</kbd>
+            Set A
+          </span>
+          <span className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 bg-surface-container border border-outline-variant rounded text-[10px] font-mono">B</kbd>
+            Set B
+          </span>
+          <span className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 bg-surface-container border border-outline-variant rounded text-[10px] font-mono">R</kbd>
+            Reset
+          </span>
         </div>
       </div>
     </div>

@@ -1,52 +1,41 @@
 import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
-import { Maximize, Loader2, Upload } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
-// Module-level cache to prevent Blob URL revocation during React Strict Mode remounts
-  let globalActiveUrl = null;
-  let globalActiveFile = null;
+let globalActiveUrl = null;
+let globalActiveFile = null;
 
-  // Helper to safely revoke with delay to prevent ERR_ABORTED if browser is still reading
-  const safeRevoke = (url) => {
-      if (!url) return;
-      setTimeout(() => {
-          URL.revokeObjectURL(url);
-      }, 5000); 
-  };
+const safeRevoke = (url) => {
+  if (!url) return;
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 5000);
+};
 
-  const WaveformStage = forwardRef(({ file, isPlaying, playMode, speed, loopCount, isVideo, onTimeUpdate, onReady, onFinish, onRegionUpdate, onLoopProgress, onOpenFile }, ref) => {
-    const containerRef = useRef(null);
-    const mediaRef = useRef(null); // Ref for video element
-    const audioRef = useRef(null); // Ref for audio element (fallback)
-    const wavesurfer = useRef(null);
-    const regionsPlugin = useRef(null);
-    const activeRegion = useRef(null);
-    // fallbackUrlRef removed as we use globalActiveUrl
-    const [showVideo, setShowVideo] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const loadingRef = useRef(false);
-    const retryRef = useRef(0);
-    const loadIdRef = useRef(0);
-    const isMounted = useRef(true);
-    const onReadyRef = useRef(onReady);
-    const onFinishRef = useRef(onFinish);
-    const onTimeUpdateRef = useRef(onTimeUpdate);
-    const onRegionUpdateRef = useRef(null);
-    const onLoopProgressRef = useRef(onLoopProgress);
-    const loopCountRef = useRef(loopCount);
-    const playModeRef = useRef(playMode);
-    const currentLoopRef = useRef(0);
-    const userSeekedRef = useRef(false);
-    const regionChangedRef = useRef(false);
-    const lastLoopTimeRef = useRef(0);
-    const ignoreRegionOutUntilRef = useRef(0);
-  
-    // Sync local video display flag with incoming isVideo/file
-  useEffect(() => {
-    setShowVideo(isVideo);
-  }, [isVideo, file]);
+const WaveformStage = forwardRef(({ file, isPlaying, speed, loopCount, onTimeUpdate, onReady, onFinish, onRegionUpdate, onLoopProgress }, ref) => {
+  const containerRef = useRef(null);
+  const audioRef = useRef(null);
+  const wavesurfer = useRef(null);
+  const regionsPlugin = useRef(null);
+  const activeRegion = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const loadingRef = useRef(false);
+  const retryRef = useRef(0);
+  const loadIdRef = useRef(0);
+  const isMounted = useRef(true);
+  const onReadyRef = useRef(onReady);
+  const onFinishRef = useRef(onFinish);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
+  const onRegionUpdateRef = useRef(onRegionUpdate);
+  const onLoopProgressRef = useRef(onLoopProgress);
+  const loopCountRef = useRef(loopCount);
+  const currentLoopRef = useRef(0);
+  const userSeekedRef = useRef(false);
+  const regionChangedRef = useRef(false);
+  const lastLoopTimeRef = useRef(0);
+  const ignoreRegionOutUntilRef = useRef(0);
 
   useEffect(() => {
     isMounted.current = true;
@@ -57,19 +46,16 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const mediaEl = showVideo ? mediaRef.current : audioRef.current;
-    if (!mediaEl) return;
+    const audioEl = audioRef.current;
+    if (!audioEl) return;
 
-    // Destroy previous instance if any
     if (wavesurfer.current) {
-        wavesurfer.current.destroy();
-        wavesurfer.current = null;
+      wavesurfer.current.destroy();
+      wavesurfer.current = null;
     }
-    
-    // Reset loading state as we have a fresh instance
+
     loadingRef.current = false;
 
-    // Create Regions Plugin instance
     const regions = RegionsPlugin.create();
     regionsPlugin.current = regions;
 
@@ -77,115 +63,90 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
 
     const options = {
       container: containerRef.current,
-      waveColor: '#334155',
-      progressColor: '#475569',
-      cursorColor: '#ffffff',
+      waveColor: '#c3c6d7',
+      progressColor: '#004ac6',
+      cursorColor: '#0b1c30',
+      cursorWidth: 2,
       barWidth: 2,
       barGap: 1,
       barRadius: 2,
-      height: 100,
+      height: 120,
       normalize: true,
-      // Lower sample rate for videos/mobile to speed up waveform generation
-      // Note: AudioContext requires sampleRate >= 3000
-      sampleRate: isVideo ? 3000 : (isMobile ? 3000 : 8000), 
+      sampleRate: isMobile ? 3000 : 8000,
       plugins: [regions],
     };
 
-    // Always use a media element (video for isVideo, audio otherwise)
-            options.media = mediaEl;
-            
-            // Removed custom fetchParams as they might be causing 'TypeError: Failed to fetch'
-            // with Blob URLs in some environments.
+    options.media = audioEl;
 
-            const ws = WaveSurfer.create(options);
-
+    const ws = WaveSurfer.create(options);
     wavesurfer.current = ws;
 
-    // Event Listeners
     ws.on('ready', () => {
       const dur = ws.getDuration();
       setIsLoading(false);
-      
-      // Inject custom styles into Shadow DOM to ensure handles are visible and styled correctly
-      // This overcomes Shadow DOM isolation that blocks global CSS
+
+      // Inject custom styles for region handles
       const wrapper = ws.getWrapper();
       const root = wrapper?.getRootNode();
       if (root instanceof ShadowRoot) {
-          const style = document.createElement('style');
-          style.textContent = `
-              /* Force wrapper overflow visible to prevent clipping */
-              .wrapper, .scroll {
-                  overflow: visible !important;
-              }
-              
-              /* Region Styles */
-              [part*="region"] {
-                  z-index: 10 !important;
-              }
-              
-              /* Handle Styles */
-        [part*="region-handle"] {
-          width: 12px !important;
-          background-color: transparent !important;
-          z-index: 100 !important;
-          cursor: ew-resize !important;
-          pointer-events: auto !important;
-          border: none !important;
-        }
-        
-        /* Handle Knob (Visual) */
-        [part*="region-handle"]::after {
-          content: "";
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 4px;
-          height: 24px;
-          background-color: #FACC15; /* Bright Yellow */
-          border-radius: 4px;
-          transform: translate(-50%, -50%);
-          box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-          transition: transform 0.1s ease, background-color 0.1s;
-          pointer-events: none; /* Let clicks pass to the handle div */
-        }
-              
-              /* Hover Effect */
-              [part*="region-handle"]:hover::after {
-                  background-color: #EAB308;
-                  transform: translate(-50%, -50%) scale(1.1);
-                  box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
-              }
-              
-              /* Vertical Line Indicator */
-              [part*="region-handle"]::before {
-                  content: "";
-                  position: absolute;
-                  top: 0;
-                  bottom: 0;
-                  left: 50%;
-                  width: 2px;
-                  background-color: rgba(255, 255, 255, 0.5);
-                  transform: translateX(-50%);
-                  z-index: -1;
-                  pointer-events: none;
-              }
-          `;
-          root.appendChild(style);
-          
-          // Also force the host element (container) to handle overflow if needed
-          if (containerRef.current) {
-             containerRef.current.style.overflow = 'visible';
+        const style = document.createElement('style');
+        style.textContent = `
+          .wrapper, .scroll {
+            overflow: visible !important;
           }
+          [part*="region"] {
+            z-index: 10 !important;
+          }
+          [part*="region-handle"] {
+            width: 12px !important;
+            background-color: transparent !important;
+            z-index: 100 !important;
+            cursor: ew-resize !important;
+            pointer-events: auto !important;
+            border: none !important;
+          }
+          [part*="region-handle"]::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 24px;
+            background-color: #004ac6;
+            border-radius: 4px;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease, background-color 0.1s;
+            pointer-events: none;
+          }
+          [part*="region-handle"]:hover::after {
+            background-color: #2563eb;
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 12px rgba(0, 74, 198, 0.4);
+          }
+          [part*="region-handle"]::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background-color: rgba(0, 74, 198, 0.3);
+            transform: translateX(-50%);
+            z-index: -1;
+            pointer-events: none;
+          }
+        `;
+        root.appendChild(style);
       }
 
       if (onReadyRef.current) onReadyRef.current(dur);
 
-      // Create default region (Full song)
       regions.clearRegions();
       const region = regions.addRegion({
         start: 0,
         end: dur,
-        color: 'rgba(139, 92, 246, 0.3)', // Purple with opacity
+        color: 'rgba(0, 74, 198, 0.15)',
         drag: true,
         resize: true,
         loop: true,
@@ -193,76 +154,66 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
       activeRegion.current = region;
       currentLoopRef.current = 0;
       if (onLoopProgressRef.current) onLoopProgressRef.current(0);
-      
+
       if (onRegionUpdateRef.current) {
         onRegionUpdateRef.current(region.start, region.end);
       }
 
-      // Apply loop settings for new region
-      if (playModeRef.current === 'sequential') {
-          region.setOptions({ loop: false });
+      if (loopCountRef.current === Infinity) {
+        region.setOptions({ loop: true });
       } else {
-        if (loopCountRef.current === Infinity) {
-          region.setOptions({ loop: true });
-        } else {
-          region.setOptions({ loop: false });
-        }
+        region.setOptions({ loop: false });
       }
     });
 
     ws.on('error', (err) => {
-        // Suppress benign abort or fetch noise
-        const msg = String(err && (err.message || err));
-        if (msg.includes('AbortError') || msg.includes('aborted')) {
-          console.warn("WaveSurfer aborted previous load (benign):", msg);
-        } else if (msg.includes('Failed to fetch')) {
-          console.warn("WaveSurfer fetch failed, likely due to previous abort or unsupported source:", msg);
-          if (!loadingRef.current) {
-             setError("Failed to load audio: Source unavailable");
-             setIsLoading(false);
-          }
-        } else {
-          console.error("WaveSurfer Error:", err);
-          setError(`Error: ${msg}`);
+      const msg = String(err && (err.message || err));
+      if (msg.includes('AbortError') || msg.includes('aborted')) {
+        console.warn("WaveSurfer aborted previous load (benign):", msg);
+      } else if (msg.includes('Failed to fetch')) {
+        console.warn("WaveSurfer fetch failed:", msg);
+        if (!loadingRef.current) {
+          setError("Failed to load audio: Source unavailable");
           setIsLoading(false);
         }
+      } else {
+        console.error("WaveSurfer Error:", err);
+        setError(`Error: ${msg}`);
+        setIsLoading(false);
+      }
     });
 
     ws.on('audioprocess', (time) => {
       if (onTimeUpdateRef.current) onTimeUpdateRef.current(time);
     });
 
-    // Interaction listener to track user seeking
     ws.on('interaction', (newTime) => {
       userSeekedRef.current = true;
-      // Manually trigger time update for UI
       if (onTimeUpdateRef.current) onTimeUpdateRef.current(newTime);
     });
 
     ws.on('finish', () => {
-       if (onFinishRef.current) onFinishRef.current();
+      if (onFinishRef.current) onFinishRef.current();
     });
 
-    // Region events
     regions.on('region-created', (region) => {
-       // Enforce single region
-       regions.getRegions().forEach(r => {
-          if (r !== region) r.remove();
-       });
-       activeRegion.current = region;
-       regionChangedRef.current = true;
-       currentLoopRef.current = 0;
-       if (onLoopProgressRef.current) onLoopProgressRef.current(0);
-       
-       if (onRegionUpdateRef.current) {
-          onRegionUpdateRef.current(region.start, region.end);
-       }
+      regions.getRegions().forEach(r => {
+        if (r !== region) r.remove();
+      });
+      activeRegion.current = region;
+      regionChangedRef.current = true;
+      currentLoopRef.current = 0;
+      if (onLoopProgressRef.current) onLoopProgressRef.current(0);
 
-       if (loopCountRef.current === Infinity && playModeRef.current !== 'sequential') {
-           region.setOptions({ loop: true });
-       } else {
-           region.setOptions({ loop: false });
-       }
+      if (onRegionUpdateRef.current) {
+        onRegionUpdateRef.current(region.start, region.end);
+      }
+
+      if (loopCountRef.current === Infinity) {
+        region.setOptions({ loop: true });
+      } else {
+        region.setOptions({ loop: false });
+      }
     });
 
     regions.on('region-updated', (region) => {
@@ -271,268 +222,153 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
       currentLoopRef.current = 0;
       if (onLoopProgressRef.current) onLoopProgressRef.current(0);
       if (onRegionUpdateRef.current) {
-         onRegionUpdateRef.current(region.start, region.end);
+        onRegionUpdateRef.current(region.start, region.end);
       }
     });
 
     regions.on('region-out', (region) => {
-       if (activeRegion.current === region) {
-           // Sequential mode: Just continue playing, ignore loop logic
-           if (playModeRef.current === 'sequential') {
-               return;
-           }
+      if (activeRegion.current === region) {
+        if (loopCountRef.current === Infinity) {
+          const now = Date.now();
+          if (now < ignoreRegionOutUntilRef.current) return;
+          if (now - lastLoopTimeRef.current < 200) return;
+          lastLoopTimeRef.current = now;
+          region.play();
+          return;
+        } else {
+          const now = Date.now();
+          if (now < ignoreRegionOutUntilRef.current) return;
+          if (now - lastLoopTimeRef.current < 200) return;
+          lastLoopTimeRef.current = now;
 
-           if (loopCountRef.current === Infinity) {
-              const now = Date.now();
-              if (now < ignoreRegionOutUntilRef.current) {
-                  return;
-              }
-              if (now - lastLoopTimeRef.current < 200) {
-                  return;
-              }
-              lastLoopTimeRef.current = now;
-              region.play();
-              return;
-           } else {
-              // Finite loop handling
-           const now = Date.now();
-           if (now < ignoreRegionOutUntilRef.current) {
-               return;
-           }
-           if (now - lastLoopTimeRef.current < 200) {
-               // Prevent double-triggering region-out
-               return;
-           }
-           lastLoopTimeRef.current = now;
-
-           if (currentLoopRef.current + 1 < loopCountRef.current) {
-              console.log(`Looping: ${currentLoopRef.current + 1}/${loopCountRef.current}`);
-              currentLoopRef.current++;
-              if (onLoopProgressRef.current) onLoopProgressRef.current(currentLoopRef.current);
-               region.play();
-            } else {
-               // Finished loops, continue playing or stop?
-               // Usually continue playing the rest of the song or stop.
-               // Let's continue.
-            }
+          if (currentLoopRef.current + 1 < loopCountRef.current) {
+            currentLoopRef.current++;
+            if (onLoopProgressRef.current) onLoopProgressRef.current(currentLoopRef.current);
+            region.play();
           }
-       }
+        }
+      }
     });
-    
-    // Cleanup
+
     return () => {
       if (wavesurfer.current) wavesurfer.current.destroy();
     };
-  }, [showVideo]);
-
-  // Handle File Loading
-  useEffect(() => {
-     let timerId;
-     if (file && wavesurfer.current) {
-         retryRef.current = 0;
-         loadIdRef.current += 1;
-         const thisLoadId = loadIdRef.current;
-         setIsLoading(true);
-         setError(null);
-
-         const attempt = async () => {
-             if (!isMounted.current || loadIdRef.current !== thisLoadId) return;
-             
-             loadingRef.current = true;
-             
-             // Use global persistent URL for the same file to support Strict Mode
-             if (file !== globalActiveFile) {
-               if (globalActiveUrl) {
-                 safeRevoke(globalActiveUrl);
-               }
-               globalActiveUrl = URL.createObjectURL(file);
-               globalActiveFile = file;
-             }
-
-             try {
-               // iOS Video Optimization:
-               // Decoding large video audio tracks via Web Audio API crashes or hangs on iOS.
-               // We skip decoding entirely by providing fake peaks, ensuring playback works.
-               const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-               
-               if (showVideo && isIOS) {
-                  // 1. Force load metadata to get duration
-                  const videoEl = mediaRef.current;
-                  if (!videoEl) throw new Error("Video element missing");
-                  
-                  // If duration is already available, use it
-                  let duration = videoEl.duration;
-                  
-                  if (!Number.isFinite(duration) || duration === 0) {
-                      videoEl.src = globalActiveUrl;
-                      await new Promise((resolve) => {
-                          // If metadata loads, resolve
-                          videoEl.onloadedmetadata = () => resolve();
-                          // Timeout fallback - reduce to 500ms for faster feedback
-                          setTimeout(() => {
-                            console.warn("Metadata load timed out");
-                            resolve();
-                          }, 500);
-                      });
-                      duration = videoEl.duration || 30; // Default to 30s if still unknown to prevent hang
-                  }
-
-                  // 2. Generate fake peaks (flat line or simple noise) to bypass decoding
-                  // WaveSurfer expects array of Float32Array
-                  const peaks = [new Float32Array(100).fill(0.01)]; 
-                  
-                  // 3. Load with pre-defined peaks
-                  // Ensure duration is strictly positive number
-                  const safeDuration = (Number.isFinite(duration) && duration > 0) ? duration : 30;
-                  await wavesurfer.current.load(globalActiveUrl, peaks, safeDuration);
-               } else {
-                  // Standard load for Desktop/Android
-                  await wavesurfer.current.load(globalActiveUrl); 
-               }
-             } catch (err) {
-               console.warn("WaveSurfer load error (likely benign in Strict Mode):", err);
-               // Retry logic for genuine aborts that are not just rapid file switches
-               if (isMounted.current && loadIdRef.current === thisLoadId && retryRef.current < 2) {
-                   const msg = String(err && (err.message || err));
-                   if (msg.includes('AbortError') || msg.includes('user aborted')) {
-                       retryRef.current++;
-                       console.log(`Retrying load (${retryRef.current}/2)...`);
-                       timerId = setTimeout(attempt, 200); // Retry after delay
-                   } else {
-                     setIsLoading(false);
-                   }
-               } else {
-                 setIsLoading(false);
-                 setError("Failed to load file. Please try again.");
-               }
-             } finally {
-                if (isMounted.current && loadIdRef.current === thisLoadId) {
-                    loadingRef.current = false;
-                }
-             }
-         };
-         
-         // Debounce load to avoid Strict Mode double-fetch which causes net::ERR_ABORTED
-         timerId = setTimeout(attempt, 200);
-     } else {
-        setIsLoading(false);
-     }
-     
-     return () => {
-       if (timerId) clearTimeout(timerId);
-     };
-  }, [file, showVideo]); // Reload when file or mode changes
-  
-  // Cleanup logic: We DO NOT revoke the URL on unmount to support Strict Mode.
-  // The URL is only revoked when a NEW file replaces the old one.
-  // This means one ObjectURL is always active as long as the app is running, which is acceptable.
+  }, []);
 
   useEffect(() => {
-    onReadyRef.current = onReady;
-  }, [onReady]);
-  useEffect(() => {
-    onFinishRef.current = onFinish;
-  }, [onFinish]);
-  useEffect(() => {
-    onTimeUpdateRef.current = onTimeUpdate;
-  }, [onTimeUpdate]);
-  useEffect(() => {
-    onRegionUpdateRef.current = onRegionUpdate;
-  }, [onRegionUpdate]);
-  useEffect(() => {
-    onLoopProgressRef.current = onLoopProgress;
-  }, [onLoopProgress]);
+    let timerId;
+    if (file && wavesurfer.current) {
+      retryRef.current = 0;
+      loadIdRef.current += 1;
+      const thisLoadId = loadIdRef.current;
+      setIsLoading(true);
+      setError(null);
+
+      const attempt = async () => {
+        if (!isMounted.current || loadIdRef.current !== thisLoadId) return;
+
+        loadingRef.current = true;
+
+        if (file !== globalActiveFile) {
+          if (globalActiveUrl) {
+            safeRevoke(globalActiveUrl);
+          }
+          globalActiveUrl = URL.createObjectURL(file);
+          globalActiveFile = file;
+        }
+
+        try {
+          await wavesurfer.current.load(globalActiveUrl);
+        } catch (err) {
+          console.warn("WaveSurfer load error:", err);
+          if (isMounted.current && loadIdRef.current === thisLoadId && retryRef.current < 2) {
+            const msg = String(err && (err.message || err));
+            if (msg.includes('AbortError') || msg.includes('user aborted')) {
+              retryRef.current++;
+              timerId = setTimeout(attempt, 200);
+            } else {
+              setIsLoading(false);
+            }
+          } else {
+            setIsLoading(false);
+            setError("Failed to load file. Please try again.");
+          }
+        } finally {
+          if (isMounted.current && loadIdRef.current === thisLoadId) {
+            loadingRef.current = false;
+          }
+        }
+      };
+
+      timerId = setTimeout(attempt, 200);
+    } else {
+      setIsLoading(false);
+    }
+
+    return () => {
+      if (timerId) clearTimeout(timerId);
+    };
+  }, [file]);
+
+  useEffect(() => { onReadyRef.current = onReady; }, [onReady]);
+  useEffect(() => { onFinishRef.current = onFinish; }, [onFinish]);
+  useEffect(() => { onTimeUpdateRef.current = onTimeUpdate; }, [onTimeUpdate]);
+  useEffect(() => { onRegionUpdateRef.current = onRegionUpdate; }, [onRegionUpdate]);
+  useEffect(() => { onLoopProgressRef.current = onLoopProgress; }, [onLoopProgress]);
   useEffect(() => {
     loopCountRef.current = loopCount;
-    // Update active region loop setting based on playMode and loopCount
     if (activeRegion.current) {
-        if (playModeRef.current === 'sequential') {
-            activeRegion.current.setOptions({ loop: false });
-        } else {
-            // Loop mode
-            if (loopCount === Infinity) {
-                activeRegion.current.setOptions({ loop: true });
-            } else {
-                activeRegion.current.setOptions({ loop: false });
-            }
-        }
+      if (loopCount === Infinity) {
+        activeRegion.current.setOptions({ loop: true });
+      } else {
+        activeRegion.current.setOptions({ loop: false });
+      }
     }
   }, [loopCount]);
 
-  useEffect(() => {
-    playModeRef.current = playMode;
-    // Update active region loop setting immediately
-    if (activeRegion.current) {
-        if (playMode === 'sequential') {
-            activeRegion.current.setOptions({ loop: false });
-        } else {
-            // Loop mode
-            if (loopCountRef.current === Infinity) {
-                activeRegion.current.setOptions({ loop: true });
-            } else {
-                activeRegion.current.setOptions({ loop: false });
-            }
-        }
-    }
-  }, [playMode]);
-
-  // Handle Play/Pause
   useEffect(() => {
     if (!wavesurfer.current) return;
     if (isPlaying) {
       const region = activeRegion.current;
       const currentTime = wavesurfer.current.getCurrentTime();
-      // Check if we need to reset (finished loops or starting from end)
-      // Use a small threshold for end detection
       const isAtEnd = region && (currentTime >= region.end - 0.1);
       const isFinished = loopCountRef.current !== Infinity && currentLoopRef.current >= loopCountRef.current;
-      
-      // If switching to sequential mode, always just resume from current time
-      if (playModeRef.current === 'sequential') {
-          wavesurfer.current.play();
-          return;
-      }
 
-      // Check for user seek in loop mode or if region has changed
       if (userSeekedRef.current || regionChangedRef.current) {
-         userSeekedRef.current = false;
-         regionChangedRef.current = false;
-         
-         // If user seeked or region changed, restart loop logic
-         currentLoopRef.current = 0;
-         if (onLoopProgressRef.current) onLoopProgressRef.current(0);
-         ignoreRegionOutUntilRef.current = Date.now() + 500; // Ignore spurious region-out events for 500ms
-         
-         if (region) {
-             region.play();
-         } else {
-             wavesurfer.current.seekTo(0);
-             wavesurfer.current.play();
-         }
-         return;
+        userSeekedRef.current = false;
+        regionChangedRef.current = false;
+        currentLoopRef.current = 0;
+        if (onLoopProgressRef.current) onLoopProgressRef.current(0);
+        ignoreRegionOutUntilRef.current = Date.now() + 500;
+
+        if (region) {
+          region.play();
+        } else {
+          wavesurfer.current.seekTo(0);
+          wavesurfer.current.play();
+        }
+        return;
       }
 
       if (isFinished || isAtEnd) {
-          currentLoopRef.current = 0;
-          if (onLoopProgressRef.current) onLoopProgressRef.current(0);
-          ignoreRegionOutUntilRef.current = Date.now() + 500; // Ignore spurious region-out events for 500ms
-          
-          if (region) {
-              region.play(); // Seeks to start and plays
-          } else {
-              wavesurfer.current.seekTo(0);
-              wavesurfer.current.play();
-          }
-      } else {
-          // Resume from current position
+        currentLoopRef.current = 0;
+        if (onLoopProgressRef.current) onLoopProgressRef.current(0);
+        ignoreRegionOutUntilRef.current = Date.now() + 500;
+
+        if (region) {
+          region.play();
+        } else {
+          wavesurfer.current.seekTo(0);
           wavesurfer.current.play();
+        }
+      } else {
+        wavesurfer.current.play();
       }
     } else {
       wavesurfer.current.pause();
     }
   }, [isPlaying]);
 
-  // Handle Speed
   useEffect(() => {
     const ws = wavesurfer.current;
     if (!ws) return;
@@ -544,37 +380,12 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
     }
   }, [speed]);
 
-  // Handle Loop Setting
-  // Moved logic to ref update above
-  // useEffect(() => {
-  //    if (activeRegion.current) {
-  //        activeRegion.current.setOptions({ loop: true }); 
-  //    }
-  // }, [loopCount]);
-
-  const toggleFullScreen = () => {
-    const video = mediaRef.current;
-    if (!video) return;
-
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else if (video.requestFullscreen) {
-      video.requestFullscreen();
-    } else if (video.webkitEnterFullscreen) {
-      // iOS Safari
-      video.webkitEnterFullscreen();
-    } else if (video.webkitRequestFullscreen) {
-      video.webkitRequestFullscreen();
-    }
-  };
-
-  // Expose methods
   useImperativeHandle(ref, () => ({
     replaySegment: () => {
       currentLoopRef.current = 0;
       if (onLoopProgressRef.current) onLoopProgressRef.current(0);
-      ignoreRegionOutUntilRef.current = Date.now() + 500; // Ignore spurious region-out events for 500ms
-      
+      ignoreRegionOutUntilRef.current = Date.now() + 500;
+
       if (activeRegion.current) {
         activeRegion.current.play();
       } else {
@@ -591,6 +402,24 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
         }
       }
     },
+    setStartMarker: () => {
+      if (activeRegion.current && wavesurfer.current) {
+        const currentTime = wavesurfer.current.getCurrentTime();
+        activeRegion.current.setOptions({ start: currentTime });
+        if (onRegionUpdateRef.current) {
+          onRegionUpdateRef.current(currentTime, activeRegion.current.end);
+        }
+      }
+    },
+    setEndMarker: () => {
+      if (activeRegion.current && wavesurfer.current) {
+        const currentTime = wavesurfer.current.getCurrentTime();
+        activeRegion.current.setOptions({ end: currentTime });
+        if (onRegionUpdateRef.current) {
+          onRegionUpdateRef.current(activeRegion.current.start, currentTime);
+        }
+      }
+    },
     fineTune: (type, delta) => {
       if (activeRegion.current) {
         const { start, end } = activeRegion.current;
@@ -604,147 +433,44 @@ import { Maximize, Loader2, Upload } from 'lucide-react';
           newEnd = Math.min(wavesurfer.current.getDuration(), end + delta);
           activeRegion.current.setOptions({ end: newEnd });
         }
-        
-        // Manually trigger update to ensure UI reflects changes immediately
+
         if (onRegionUpdateRef.current) {
-           onRegionUpdateRef.current(newStart, newEnd);
+          onRegionUpdateRef.current(newStart, newEnd);
         }
       }
     }
   }));
 
-  // Render
   return (
-    <div className={`w-full h-full flex flex-col items-center relative ${isVideo ? 'justify-start' : 'justify-center'}`}>
-      {!file && (
-        <div className="absolute inset-0 flex items-center justify-center z-50 p-6 pointer-events-auto">
-          <button
-            onClick={onOpenFile}
-            className="group relative flex flex-col items-center justify-center w-full max-w-[140px] md:max-w-[200px] aspect-square rounded-3xl bg-gray-800/20 hover:bg-gray-800/40 border-2 border-dashed border-gray-700 hover:border-accent/50 transition-all duration-500 ease-out hover:scale-105 active:scale-95"
-          >
-            {/* Glow effect behind */}
-            <div className="absolute inset-0 rounded-3xl bg-accent/5 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
-            
-            {/* Icon Container */}
-            <div className="relative w-14 h-14 md:w-20 md:h-20 mb-4 md:mb-6 rounded-2xl bg-gray-900/50 flex items-center justify-center shadow-inner border border-gray-800 group-hover:border-accent/30 transition-colors duration-500">
-               <Upload className="w-6 h-6 md:w-8 md:h-8 text-gray-500 group-hover:text-accent transition-colors duration-300" />
-            </div>
+    <div className="w-full relative">
+      <audio ref={audioRef} className="hidden" preload="metadata" />
 
-            {/* Text */}
-            <div className="flex flex-col items-center gap-1 md:gap-2">
-              <span className="text-lg md:text-xl font-bold text-gray-300 group-hover:text-white tracking-wide transition-colors">
-                Open Media
-              </span>
-              <span className="text-[10px] md:text-xs font-medium text-gray-500 group-hover:text-accent/80 uppercase tracking-widest transition-colors">
-                Audio or Video
-              </span>
-            </div>
-          </button>
-        </div>
-      )}
-      {/* Video Player */}
-      {isVideo && (
-        <div className="flex-1 min-h-0 w-full mb-4 relative z-0">
-            {/* Force fullscreen styles for Android native browser */}
-            <style>{`
-              video:fullscreen {
-                width: 100vw !important;
-                height: 100vh !important;
-                object-fit: contain !important;
-                background: black !important;
-              }
-              video:-webkit-full-screen {
-                width: 100vw !important;
-                height: 100vh !important;
-                object-fit: contain !important;
-                background: black !important;
-              }
-            `}</style>
-            {/* Video element needs simple container for X5 compatibility */}
-            <video 
-               ref={mediaRef} 
-               className="absolute inset-0 w-full h-full bg-black"
-               style={{ objectFit: 'contain' }}
-               playsInline
-               webkit-playsinline="true"
-               x5-playsinline="true"
-               preload="metadata"
-               onError={(e) => {
-                 const target = e.nativeEvent?.target;
-                 const err = target?.error;
-                 const code = err?.code;
-                 const msg = err?.message || '';
-                 console.error("Video Element Error:", { code, msg });
-                 
-                 // On iOS, fallback to audio-only decoding causes crashes for large files.
-                 // We prefer to keep video mode even if it fails, or show error.
-                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                 if (!isIOS) {
-                    setShowVideo(false);
-                 }
-               }}
-            />
-            <button 
-               onClick={toggleFullScreen}
-               className="absolute bottom-3 right-3 p-2 bg-black/60 text-white rounded-full opacity-60 hover:opacity-100 transition-opacity backdrop-blur-sm z-10"
-               title="Full Screen"
-            >
-              <Maximize size={20} />
-            </button>
-        </div>
-      )}
-      {/* Hidden audio element for non-video or fallback */}
-      {!isVideo && (
-        <audio
-           ref={audioRef}
-           className="hidden"
-           preload="metadata"
-        />
-      )}
-      
-      {/* Waveform Container */}
-      <div className="relative w-full shrink-0 h-[100px] mb-6 px-3">
+      <div className="relative w-full" style={{ minHeight: '120px' }}>
         <div ref={containerRef} className="w-full" />
-         
-         {/* Loading Overlay */}
-         {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm z-50 rounded-lg">
-               <div className="flex flex-col items-center gap-3 animate-pulse">
-                  <Loader2 className="w-10 h-10 text-accent animate-spin" />
-                  <span className="text-sm font-medium text-slate-200 tracking-wide">Loading Waveform...</span>
-               </div>
-            </div>
-         )}
 
-         {/* Error Overlay */}
-         {error && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm z-50 rounded-lg">
-               <div className="flex flex-col items-center gap-3 p-6 bg-red-900/20 border border-red-500/30 rounded-xl shadow-2xl">
-                  <span className="text-red-400 font-medium text-center">{error}</span>
-                  <button 
-                    onClick={() => window.location.reload()} 
-                    className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs rounded-full transition-colors border border-red-500/20"
-                  >
-                    Reload Page
-                  </button>
-               </div>
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-surface-container-high/80 backdrop-blur-sm z-50 rounded-lg">
+            <div className="flex flex-col items-center gap-3 animate-pulse">
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <span className="text-sm font-medium text-on-surface-variant tracking-wide">Loading Waveform...</span>
             </div>
-         )}
+          </div>
+        )}
+
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-surface/90 backdrop-blur-sm z-50 rounded-lg">
+            <div className="flex flex-col items-center gap-3 p-6 bg-error-container/20 border border-error/30 rounded-xl shadow-2xl">
+              <span className="text-error font-medium text-center">{error}</span>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-error/10 hover:bg-error/20 text-error text-xs rounded-full transition-colors border border-error/20"
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-      
-      {/* Time Display */}
-      {file && (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-8 text-4xl font-mono font-bold text-white drop-shadow-lg">
-          {/* We need time state here or pass it up. 
-              Since we update onTimeUpdate, let's use a local ref or expect parent to pass formatted time?
-              Actually, passing time back down causes re-renders. 
-              Let's make this component self-contained for display or use a separate component.
-              For now, I'll let the parent handle the time display logic if I passed onTimeUpdate.
-              Wait, the design says "Time: Suspended above waveform". 
-              I'll render it here if I have the time.
-          */}
-        </div>
-      )}
     </div>
   );
 });

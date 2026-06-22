@@ -3,19 +3,44 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
-  background-color: #0F172A;
-  color: white;
-  font-family: 'Roboto', system-ui, sans-serif;
-  overflow: hidden; /* Prevent scrolling for SPA feel */
-  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
-  -webkit-touch-callout: none; /* Disable long-press menu */
-  -webkit-user-select: none; /* Disable text selection */
+  background-color: #f8f9ff;
+  color: #1a1a2e;
+  font-family: 'Geist', 'Roboto', system-ui, sans-serif;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
+}
+
+/* --- Custom Scrollbar (Utility-Premium Style) --- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c9d6;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #004ac6;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #c5c9d6 transparent;
 }
 
 @keyframes slogan-shine {
