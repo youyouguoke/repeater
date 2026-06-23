@@ -136,6 +136,42 @@ const WaveformStage = forwardRef(({ file, isPlaying, speed, loopCount, onTimeUpd
             z-index: -1;
             pointer-events: none;
           }
+          [part*="region-handle"]:first-child::after {
+            content: "A";
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #004ac6;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+          }
+          [part*="region-handle"]:last-child::after {
+            content: "B";
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #004ac6;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+          }
         `;
         root.appendChild(style);
       }

@@ -1,49 +1,286 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Audio Repeater Online</title>
-    <meta name="description" content="About Audio Repeater Online. Audio Repeater Online – Free browser-based audio loop tool.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>About Audio Repeater</title>
+    <meta name="description" content="About Audio Repeater. A free browser-based audio loop tool for music practice, language learning, and transcription.">
     <link rel="canonical" href="https://repeater.online/about">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist-font@1.1.0/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist-font@1.1.0/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+            font-weight: 500;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist-font@1.1.0/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+            font-weight: 600;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist-font@1.1.0/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-display: swap;
+        }
+
+        :root {
+            --background: #f4f6fb;
+            --on-background: #0b1c30;
+            --surface: #ffffff;
+            --on-surface: #0b1c30;
+            --on-surface-variant: #5a6372;
+            --surface-container: #e8ecf5;
+            --surface-container-low: #eef1f7;
+            --surface-container-lowest: #ffffff;
+            --surface-container-high: #e1e6f0;
+            --surface-container-highest: #d8dde8;
+            --primary: #004ac6;
+            --on-primary: #ffffff;
+            --primary-container: #d6e3ff;
+            --on-primary-fixed-variant: #004ac6;
+            --outline-variant: #d8dde8;
+            --error: #ba1a1a;
+            --error-container: #ffdad6;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9ff; color: #1a1a2e; line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-        header { text-align: center; padding: 60px 20px; background: linear-gradient(135deg, #004ac6 0%, #0066ff 100%); color: white; margin-bottom: 40px; }
-        header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 600; }
-        .content { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        .content p { margin-bottom: 16px; font-size: 1.05em; color: #444; }
-        .content a { color: #004ac6; text-decoration: none; }
-        .content a:hover { text-decoration: underline; }
-        footer { text-align: center; padding: 40px; color: #666; font-size: 0.9em; }
-        footer a { color: #004ac6; text-decoration: none; margin: 0 10px; }
-        .nav { text-align: center; margin-bottom: 30px; }
-        .nav a { color: #004ac6; text-decoration: none; margin: 0 15px; font-weight: 500; }
+
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--on-background);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--outline-variant);
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .nav-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-logo-icon svg {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+        .nav-logo-text {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--on-surface);
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+        .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--on-surface-variant);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-links a.active { color: var(--primary); }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 32px 24px 24px;
+        }
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 600;
+            color: var(--on-surface);
+            margin-bottom: 12px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* Content */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px 40px;
+        }
+        .content-card {
+            background: var(--surface-container-lowest);
+            border: 1px solid var(--outline-variant);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .content-card p {
+            margin-bottom: 16px;
+            font-size: 15px;
+            color: var(--on-surface-variant);
+            line-height: 1.7;
+        }
+        .content-card p:last-child { margin-bottom: 0; }
+        .content-card a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .content-card a:hover { text-decoration: underline; }
+
+        /* Footer */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--outline-variant);
+            padding: 40px 24px;
+        }
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .footer-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        @media (min-width: 768px) {
+            .footer-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer-brand svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+        .footer-brand span {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--on-surface);
+        }
+        .footer-copyright {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+        }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+        .footer-links a {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--primary); }
     </style>
 </head>
 <body>
-    <header>
-        <h1>About Audio Repeater</h1>
-    </header>
-    <div class="container">
-        <div class="nav">
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-            <a href="/privacy">Privacy</a>
-            <a href="/contact">Contact</a>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">
+                <div class="nav-logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+                </div>
+                <span class="nav-logo-text">Online Repeater</span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Audio Repeater</a>
+                <a href="/about" class="active">About</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/contact">Contact</a>
+            </div>
         </div>
-        <div class="content">
-            
-        <p>Audio Repeater Online was built by a team of musicians, language learners, and developers who were frustrated with the lack of simple, privacy-focused audio looping tools.</p>
-        <p>We believe that learning through repetition is one of the most effective techniques for mastering music, languages, and any auditory skill. Our mission is to make professional-grade audio looping accessible to everyone, completely free and without compromising your privacy.</p>
-        <p>Unlike other tools that require software installation or upload your files to remote servers, Audio Repeater Online processes everything locally in your browser. Your audio never leaves your computer.</p>
-        
+    </nav>
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>About Audio Repeater</h1>
+        <p>A free browser-based audio loop tool for music practice, language learning, and transcription.</p>
+    </div>
+
+    <!-- Content -->
+    <div class="container">
+        <div class="content-card">
+            <p>Audio Repeater was built by a team of musicians, language learners, and developers who were frustrated with the lack of simple, privacy-focused audio looping tools.</p>
+            <p>We believe that learning through repetition is one of the most effective techniques for mastering music, languages, and any auditory skill. Our mission is to make professional-grade audio looping accessible to everyone, completely free and without compromising your privacy.</p>
+            <p>Unlike other tools that require software installation or upload your files to remote servers, Audio Repeater processes everything locally in your browser. Your audio never leaves your computer.</p>
         </div>
     </div>
+
+    <!-- Footer -->
     <footer>
-        <p>© 2026 Audio Repeater Online. All rights reserved.</p>
-        <p><a href="/">Home</a> <a href="/about">About</a> <a href="/privacy">Privacy</a> <a href="/contact">Contact</a></p>
+        <div class="footer-inner">
+            <div class="footer-bottom">
+                <div class="footer-brand">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+                    <span>Online Repeater</span>
+                    <span class="footer-copyright">© 2026</span>
+                </div>
+                <div class="footer-links">
+                    <a href="/about">About</a>
+                    <a href="/privacy">Privacy Policy</a>
+                    <a href="/contact">Contact</a>
+                </div>
+            </div>
+        </div>
     </footer>
 </body>
 </html>
