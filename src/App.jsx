@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Music, Languages, FileText, CheckCircle, ChevronDown, ChevronUp, Upload, Headphones, Guitar, Piano, Mic, BookOpen, Globe, Volume2, ArrowRight, Video, Youtube, Wrench, Shield, Mail, ExternalLink } from 'lucide-react';
 import WaveformStage from './components/WaveformStage';
 import ControlDeck from './components/ControlDeck';
+import { trackEvent, trackPageview, EVENTS } from './lib/analytics';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -35,6 +36,7 @@ function App() {
     if (uploadedFile) {
       setFile(uploadedFile);
       setIsPlaying(false);
+      trackEvent(EVENTS.FILE_UPLOAD, { format: uploadedFile.name.split('.').pop().toLowerCase() });
     }
   };
 
@@ -75,14 +77,17 @@ function App() {
     if (droppedFile && droppedFile.type.startsWith('audio/')) {
       setFile(droppedFile);
       setIsPlaying(false);
+      trackEvent(EVENTS.FILE_DROP, { format: droppedFile.name.split('.').pop().toLowerCase() });
     }
   };
 
   const toggleLoopPlay = () => {
     if (isPlaying) {
       setIsPlaying(false);
+      trackEvent(EVENTS.PAUSE_CLICK);
     } else {
       setIsPlaying(true);
+      trackEvent(EVENTS.PLAY_CLICK);
       const timeDiff = Math.abs(currentTime - lastPauseTimeRef.current);
       if (timeDiff > 0.1) {
         waveformRef.current?.replaySegment();
@@ -154,10 +159,15 @@ function App() {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
       setActiveNav(id);
     }
+    trackEvent(EVENTS.NAV_CLICK, { section: id });
   };
 
   const toggleFaq = (index) => {
-    setOpenFaq(openFaq === index ? null : index);
+    const isOpening = openFaq !== index;
+    setOpenFaq(isOpening ? index : null);
+    if (isOpening) {
+      trackEvent(EVENTS.FAQ_TOGGLE, { question_index: index });
+    }
   };
 
   const faqData = [

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pause, Play, RotateCcw, SkipBack } from 'lucide-react';
+import { trackEvent, EVENTS } from '../lib/analytics';
 
 const ControlDeck = ({
   isPlaying,
@@ -30,7 +31,10 @@ const ControlDeck = ({
       {/* Top Row: Replay + Play + Reset */}
       <div className="flex items-center gap-2">
         <button
-          onClick={onReplaySegment}
+          onClick={() => {
+            onReplaySegment();
+            trackEvent(EVENTS.REPLAY_SEGMENT);
+          }}
           className="flex-1 h-10 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-medium hover:bg-surface-container transition-colors flex items-center justify-center gap-1"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -51,7 +55,10 @@ const ControlDeck = ({
           )}
         </button>
         <button
-          onClick={onResetRegion}
+          onClick={() => {
+            onResetRegion();
+            trackEvent(EVENTS.LOOP_RESET);
+          }}
           className="flex-1 h-10 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-medium hover:bg-surface-container transition-colors flex items-center justify-center gap-1"
         >
           <SkipBack className="w-3.5 h-3.5" />
@@ -69,7 +76,10 @@ const ControlDeck = ({
             <div className="flex-1 bg-surface-container-low rounded-lg px-3 py-2 flex items-center justify-between">
               <span className="text-sm font-mono font-bold text-on-surface">{regionStart}</span>
               <button
-                onClick={onSetStart}
+                onClick={() => {
+                  onSetStart();
+                  trackEvent(EVENTS.LOOP_SET_START);
+                }}
                 className="px-2 py-1 bg-surface-container-high border border-outline-variant rounded text-[10px] font-medium hover:bg-surface-container transition-colors"
               >
                 Set A
@@ -83,7 +93,10 @@ const ControlDeck = ({
               {loopOptions.map((option) => (
                 <button
                   key={option.label}
-                  onClick={() => onLoopChange(option.value)}
+                  onClick={() => {
+                    onLoopChange(option.value);
+                    trackEvent(EVENTS.LOOP_COUNT_CHANGE, { count: option.label });
+                  }}
                   className={`py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
                     loopCount === option.value
                       ? 'bg-primary text-on-primary shadow-sm'
@@ -105,7 +118,10 @@ const ControlDeck = ({
             <div className="flex-1 bg-surface-container-low rounded-lg px-3 py-2 flex items-center justify-between">
               <span className="text-sm font-mono font-bold text-on-surface">{regionEnd}</span>
               <button
-                onClick={onSetEnd}
+                onClick={() => {
+                  onSetEnd();
+                  trackEvent(EVENTS.LOOP_SET_END);
+                }}
                 className="px-2 py-1 bg-surface-container-high border border-outline-variant rounded text-[10px] font-medium hover:bg-surface-container transition-colors"
               >
                 Set B
@@ -119,7 +135,10 @@ const ControlDeck = ({
               {speedOptions.map((s) => (
                 <button
                   key={s}
-                  onClick={() => onSpeedChange(s)}
+                  onClick={() => {
+                    onSpeedChange(s);
+                    trackEvent(EVENTS.SPEED_CHANGE, { speed: s + 'x' });
+                  }}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
                     speed === s
                       ? 'bg-primary text-on-primary shadow-sm'
