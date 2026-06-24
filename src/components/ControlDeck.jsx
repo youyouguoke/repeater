@@ -66,10 +66,10 @@ const ControlDeck = ({
         </button>
       </div>
 
-      {/* Start/End + Loop/Speed Row */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Left Column: Start + Loop */}
-        <div className="space-y-2">
+      {/* Mobile: Single Column / Desktop: Two Columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Left Column: Start + End (reordered on mobile via CSS) */}
+        <div className="space-y-2 md:order-1">
           {/* Start */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant w-10 flex-shrink-0">Start</span>
@@ -86,8 +86,28 @@ const ControlDeck = ({
               </button>
             </div>
           </div>
-          {/* Loop */}
-          <div className="flex items-center gap-2">
+          {/* End - moved before Loop on mobile */}
+          <div className="flex items-center gap-2 md:order-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant w-10 flex-shrink-0">End</span>
+            <div className="flex-1 bg-surface-container-low rounded-lg px-3 py-2 flex items-center justify-between">
+              <span className="text-sm font-mono font-bold text-on-surface">{regionEnd}</span>
+              <button
+                onClick={() => {
+                  onSetEnd();
+                  trackEvent(EVENTS.LOOP_SET_END);
+                }}
+                className="px-2 py-1 bg-surface-container-high border border-outline-variant rounded text-[10px] font-medium hover:bg-surface-container transition-colors"
+              >
+                Set B
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Loop + Speed (reordered on mobile via CSS) */}
+        <div className="space-y-2 md:order-2">
+          {/* Loop - moved after End on mobile */}
+          <div className="flex items-center gap-2 md:order-1">
             <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant w-10 flex-shrink-0">Loop</span>
             <div className="flex-1 bg-surface-container-low rounded-lg p-2 grid grid-cols-4 gap-1.5">
               {loopOptions.map((option) => (
@@ -106,26 +126,6 @@ const ControlDeck = ({
                   {option.label}
                 </button>
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: End + Speed */}
-        <div className="space-y-2">
-          {/* End */}
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant w-10 flex-shrink-0">End</span>
-            <div className="flex-1 bg-surface-container-low rounded-lg px-3 py-2 flex items-center justify-between">
-              <span className="text-sm font-mono font-bold text-on-surface">{regionEnd}</span>
-              <button
-                onClick={() => {
-                  onSetEnd();
-                  trackEvent(EVENTS.LOOP_SET_END);
-                }}
-                className="px-2 py-1 bg-surface-container-high border border-outline-variant rounded text-[10px] font-medium hover:bg-surface-container transition-colors"
-              >
-                Set B
-              </button>
             </div>
           </div>
           {/* Speed */}
@@ -153,8 +153,8 @@ const ControlDeck = ({
         </div>
       </div>
 
-      {/* Keyboard Shortcuts Hint */}
-      <div className="pt-2 border-t border-outline-variant">
+      {/* Keyboard Shortcuts Hint - Hidden on mobile */}
+      <div className="hidden md:block pt-2 border-t border-outline-variant">
         <div className="pt-3 flex items-center justify-center gap-6 text-[10px] text-on-surface-variant font-mono">
           <span className="flex items-center gap-1.5">
             <kbd className="px-1.5 py-0.5 bg-surface-container border border-outline-variant rounded text-[9px] font-mono">Space</kbd>

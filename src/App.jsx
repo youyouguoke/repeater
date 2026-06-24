@@ -318,7 +318,7 @@ function App() {
               {file.name}
             </div>
 
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-6">
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 md:p-6 shadow-sm space-y-6">
               <WaveformStage
                 ref={waveformRef}
                 file={file}

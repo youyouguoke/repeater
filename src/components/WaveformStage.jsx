@@ -74,6 +74,8 @@ const WaveformStage = forwardRef(({ file, isPlaying, speed, loopCount, onTimeUpd
       normalize: true,
       sampleRate: isMobile ? 3000 : 8000,
       plugins: [regions],
+      dragToSeek: false,
+      interact: !isMobile,
     };
 
     options.media = audioEl;
@@ -481,8 +483,8 @@ const WaveformStage = forwardRef(({ file, isPlaying, speed, loopCount, onTimeUpd
     <div className="w-full relative">
       <audio ref={audioRef} className="hidden" preload="metadata" />
 
-      <div className="relative w-full" style={{ minHeight: '120px' }}>
-        <div ref={containerRef} className="w-full" />
+      <div className="relative w-full" style={{ minHeight: '120px', touchAction: 'pan-y' }}>
+        <div ref={containerRef} className="w-full" style={{ touchAction: 'pan-y' }} />
 
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-surface-container-high/80 backdrop-blur-sm z-50 rounded-lg">

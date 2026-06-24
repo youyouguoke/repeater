@@ -62,6 +62,16 @@ html {
   filter: drop-shadow(0 0 8px rgba(139,92,246,0.6)) drop-shadow(0 0 16px rgba(96,165,250,0.5));
 }
 
+/* --- WaveSurfer Mobile Touch Fix --- */
+@media (max-width: 768px) {
+  .wavesurfer-region {
+    touch-action: none !important;
+  }
+  [part*="region"] {
+    touch-action: none !important;
+  }
+}
+
 /* --- WaveSurfer Region Customization --- */
 
 /* Ensure the region element allows handles to overflow (stick out) */
