@@ -37,4 +37,6 @@ export const EVENTS = {
   NAV_CLICK: 'nav_click',
   FILE_DROP: 'file_drop',
   REPLAY_SEGMENT: 'replay_segment',
+  VIDEO_FRAME_STEP: 'video_frame_step',
+  VIDEO_QUICK_LOOP: 'video_quick_loop',
 };

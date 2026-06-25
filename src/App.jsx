@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Music, Languages, FileText, CheckCircle, ChevronDown, ChevronUp, Upload, Headphones, Guitar, Piano, Mic, BookOpen, Globe, Volume2, ArrowRight, Video, Youtube, Wrench, Shield, Mail, ExternalLink } from 'lucide-react';
+import { Music, Languages, FileText, CheckCircle, ChevronDown, ChevronUp, Upload, Headphones, Guitar, Piano, Mic, BookOpen, Globe, Volume2, ArrowRight, Video, Youtube, Wrench, Shield, Mail, ExternalLink, Menu, X } from 'lucide-react';
 import WaveformStage from './components/WaveformStage';
 import ControlDeck from './components/ControlDeck';
 import { trackEvent, trackPageview, EVENTS } from './lib/analytics';
@@ -17,6 +17,7 @@ function App() {
   const [activeNav, setActiveNav] = useState('tool');
   const [dragActive, setDragActive] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dragCounter = useRef(0);
 
   const waveformRef = useRef(null);
@@ -212,6 +213,7 @@ function App() {
             </div>
             <span className="font-semibold text-lg text-on-surface">Online Repeater</span>
           </div>
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
             <button 
               onClick={() => scrollToSection('tool')}
@@ -219,6 +221,12 @@ function App() {
             >
               Audio Repeater
             </button>
+            <a 
+              href="/video"
+              className="text-sm font-medium transition-colors text-on-surface-variant hover:text-on-surface"
+            >
+              Video Repeater
+            </a>
             <button 
               onClick={() => scrollToSection('faq')}
               className={`text-sm font-medium transition-colors ${activeNav === 'faq' ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
@@ -226,7 +234,41 @@ function App() {
               FAQ
             </button>
           </div>
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-surface-container transition-colors"
+            aria-label="Menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5 text-on-surface" /> : <Menu className="w-5 h-5 text-on-surface" />}
+          </button>
         </div>
+        {/* Mobile Nav Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-outline-variant bg-surface/95 backdrop-blur-xl">
+            <div className="px-gutter py-3 space-y-1">
+              <button 
+                onClick={() => { scrollToSection('tool'); setMobileMenuOpen(false); }}
+                className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeNav === 'tool' ? 'text-primary bg-surface-container' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'}`}
+              >
+                Audio Repeater
+              </button>
+              <a 
+                href="/video"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium transition-colors text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+              >
+                Video Repeater
+              </a>
+              <button 
+                onClick={() => { scrollToSection('faq'); setMobileMenuOpen(false); }}
+                className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeNav === 'faq' ? 'text-primary bg-surface-container' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'}`}
+              >
+                FAQ
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section - Compact */}
