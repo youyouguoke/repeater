@@ -227,6 +227,12 @@ function App() {
             >
               Video Repeater
             </a>
+            <a 
+              href="/youtube"
+              className="text-sm font-medium transition-colors text-on-surface-variant hover:text-on-surface"
+            >
+              YouTube Looper
+            </a>
             <button 
               onClick={() => scrollToSection('faq')}
               className={`text-sm font-medium transition-colors ${activeNav === 'faq' ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
@@ -259,6 +265,13 @@ function App() {
                 className="block px-3 py-2 rounded-lg text-sm font-medium transition-colors text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
               >
                 Video Repeater
+              </a>
+              <a 
+                href="/youtube"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium transition-colors text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+              >
+                YouTube Looper
               </a>
               <button 
                 onClick={() => { scrollToSection('faq'); setMobileMenuOpen(false); }}
@@ -525,14 +538,15 @@ function App() {
       {/* Footer */}
       <footer className="bg-surface border-t border-outline-variant">
         <div className="max-w-container-max mx-auto px-gutter py-12">
-          {/* Copyright */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
               <Headphones className="w-5 h-5 text-primary" />
               <span className="font-semibold text-on-surface">Online Repeater</span>
               <span className="text-sm text-on-surface-variant">© 2026</span>
             </div>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
+              <a href="/video" className="text-sm text-on-surface-variant hover:text-primary transition-colors">Video Repeater</a>
+              <a href="/youtube" className="text-sm text-on-surface-variant hover:text-primary transition-colors">YouTube Looper</a>
               <a href="/about" className="text-sm text-on-surface-variant hover:text-primary transition-colors">About</a>
               <a href="/privacy" className="text-sm text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</a>
               <a href="/contact" className="text-sm text-on-surface-variant hover:text-primary transition-colors">Contact</a>
