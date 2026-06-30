@@ -773,8 +773,10 @@
       });
 
       // Frame step
-      document.getElementById('frame-back').addEventListener('click', () => stepFrame(-1));
-      document.getElementById('frame-forward').addEventListener('click', () => stepFrame(1));
+      const frameBackBtn = document.getElementById('frame-back');
+      const frameForwardBtn = document.getElementById('frame-forward');
+      if (frameBackBtn) frameBackBtn.addEventListener('click', () => stepFrame(-1));
+      if (frameForwardBtn) frameForwardBtn.addEventListener('click', () => stepFrame(1));
 
       function stepFrame(direction) {
         pause();

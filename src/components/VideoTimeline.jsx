@@ -11,7 +11,8 @@ const VideoTimeline = ({
   isPlaying,
 }) => {
   const trackRef = useRef(null);
-  const [dragging, setDragging] = useState(null); // 'a', 'b', or 'playhead'
+  const draggingRef = useRef(null); // 用 ref 存储拖动状态，避免闭包问题
+  const [dragging, setDragging] = useState(null); // 'a', 'b', or 'playhead'，仅用于 UI
   const [hoverTime, setHoverTime] = useState(null);
 
   const timeToPercent = useCallback((time) => {
@@ -35,26 +36,28 @@ const VideoTimeline = ({
   const handleMouseDown = useCallback((e, type) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragging(type);
+    draggingRef.current = type; // 立即更新 ref
+    setDragging(type); // 触发 UI 更新
   }, []);
 
   const handleMouseMove = useCallback((e) => {
-    if (!dragging || !trackRef.current) return;
+    if (!draggingRef.current || !trackRef.current) return;
     const time = getTimeFromEvent(e);
 
-    if (dragging === 'a') {
+    if (draggingRef.current === 'a') {
       const newStart = Math.min(time, loopEnd - 0.5);
       onLoopStartChange?.(Math.max(0, newStart));
-    } else if (dragging === 'b') {
+    } else if (draggingRef.current === 'b') {
       const newEnd = Math.max(time, loopStart + 0.5);
       onLoopEndChange?.(Math.min(duration, newEnd));
-    } else if (dragging === 'playhead') {
+    } else if (draggingRef.current === 'playhead') {
       onSeek?.(time);
     }
-  }, [dragging, loopStart, loopEnd, duration, getTimeFromEvent, onLoopStartChange, onLoopEndChange, onSeek]);
+  }, [loopStart, loopEnd, duration, getTimeFromEvent, onLoopStartChange, onLoopEndChange, onSeek]);
 
   const handleMouseUp = useCallback(() => {
-    setDragging(null);
+    draggingRef.current = null; // 立即更新 ref
+    setDragging(null); // 触发 UI 更新
   }, []);
 
   const handleTrackClick = useCallback((e) => {
@@ -64,19 +67,17 @@ const VideoTimeline = ({
   }, [dragging, getTimeFromEvent, onSeek]);
 
   useEffect(() => {
-    if (dragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleMouseMove, { passive: false });
-      window.addEventListener('touchend', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-        window.removeEventListener('touchmove', handleMouseMove);
-        window.removeEventListener('touchend', handleMouseUp);
-      };
-    }
-  }, [dragging, handleMouseMove, handleMouseUp]);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchmove', handleMouseMove, { passive: false });
+    window.addEventListener('touchend', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleMouseMove);
+      window.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   const startPercent = timeToPercent(loopStart || 0);
   const endPercent = timeToPercent(loopEnd || duration || 0);

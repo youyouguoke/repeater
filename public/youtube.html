@@ -368,9 +368,40 @@
 
       <!-- YouTube Workspace (hidden initially) -->
       <section id="workspace" class="hidden bg-white border border-outline-variant rounded-xl shadow-sm mb-16 overflow-hidden">
+        <!-- Video Info Card -->
+        <div id="video-info-card" class="hidden bg-surface-container-low border-b border-outline-variant p-3 flex items-center gap-3">
+          <div id="video-thumbnail" class="w-20 h-14 bg-surface-container-highest rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-surface-variant text-2xl">play_circle</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 id="video-title" class="text-sm font-semibold text-on-surface truncate">Loading...</h3>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="video-channel" class="text-xs text-on-surface-variant">YouTube</span>
+              <span class="text-xs text-on-surface-variant">·</span>
+              <span id="video-duration" class="text-xs text-on-surface-variant font-mono">00:00</span>
+            </div>
+          </div>
+          <div class="flex-shrink-0 bg-primary/10 px-2 py-1 rounded-md">
+            <span class="text-xs text-primary font-mono font-medium">YouTube</span>
+          </div>
+        </div>
+
         <!-- YouTube Player Container -->
         <div id="player-container" class="relative aspect-video bg-black overflow-hidden">
           <div id="youtube-player" class="w-full h-full"></div>
+        </div>
+
+        <!-- Loop Region Info Bar -->
+        <div id="loop-info-bar" class="hidden bg-surface-container-low border-b border-outline-variant px-3 py-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[16px]">loop</span>
+            <span class="text-xs text-on-surface-variant font-medium">Loop Region</span>
+          </div>
+          <div class="flex items-center gap-1 text-xs font-mono text-primary font-bold">
+            <span id="loop-info-start">00:00</span>
+            <span class="text-on-surface-variant">→</span>
+            <span id="loop-info-end">00:00</span>
+          </div>
         </div>
 
         <!-- Compact Control Panel -->
@@ -749,6 +780,41 @@
             onStateChange: onPlayerStateChange
           }
         });
+        // Fetch video info for the info card
+        fetchVideoInfo(videoId);
+      }
+
+      async function fetchVideoInfo(videoId) {
+        const videoInfoCard = document.getElementById('video-info-card');
+        const videoTitle = document.getElementById('video-title');
+        const videoChannel = document.getElementById('video-channel');
+        const videoDuration = document.getElementById('video-duration');
+        const videoThumbnail = document.getElementById('video-thumbnail');
+        
+        if (videoInfoCard) videoInfoCard.classList.remove('hidden');
+        
+        // Set thumbnail immediately
+        if (videoThumbnail) {
+          videoThumbnail.innerHTML = `<img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="Thumbnail" class="w-full h-full object-cover" />`;
+        }
+        
+        // Try to fetch video title and duration from oEmbed
+        try {
+          const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+          if (response.ok) {
+            const data = await response.json();
+            if (videoTitle) videoTitle.textContent = data.title || 'YouTube Video';
+            if (videoChannel) videoChannel.textContent = data.author_name || 'YouTube';
+          } else {
+            // Fallback: use generic title
+            if (videoTitle) videoTitle.textContent = 'YouTube Video';
+          }
+        } catch (e) {
+          console.log('Could not fetch video info:', e);
+          if (videoTitle) videoTitle.textContent = 'YouTube Video';
+        }
+        
+        // Duration will be updated when player is ready
       }
 
       function onPlayerReady(event) {
@@ -758,6 +824,15 @@
         currentLoop = 0;
         timeStart.textContent = formatTime(0);
         timeEnd.textContent = formatTime(duration);
+        
+        // Update video duration in info card
+        const videoDuration = document.getElementById('video-duration');
+        if (videoDuration) videoDuration.textContent = formatTime(duration);
+        
+        // Show loop info bar
+        const loopInfoBar = document.getElementById('loop-info-bar');
+        if (loopInfoBar) loopInfoBar.classList.remove('hidden');
+        
         updateUI();
         startUpdateInterval();
       }
@@ -834,6 +909,12 @@
         if (regionEndEl) regionEndEl.textContent = formatTime(loopEnd);
         if (statusRange) statusRange.textContent = `Range: ${formatTime(loopStart)} — ${formatTime(loopEnd)}`;
         if (statusSpeed) statusSpeed.textContent = `Speed: ${speed.toFixed(2)}x`;
+        
+        // Update loop info bar
+        const loopInfoStart = document.getElementById('loop-info-start');
+        const loopInfoEnd = document.getElementById('loop-info-end');
+        if (loopInfoStart) loopInfoStart.textContent = formatTime(loopStart);
+        if (loopInfoEnd) loopInfoEnd.textContent = formatTime(loopEnd);
       }
 
       // ===== Load Video =====

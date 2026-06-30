@@ -100,12 +100,15 @@ const WaveformStage = forwardRef(({ file, isPlaying, speed, loopCount, onTimeUpd
             z-index: 10 !important;
           }
           [part*="region-handle"] {
-            width: 12px !important;
+            width: 24px !important;
             background-color: transparent !important;
             z-index: 100 !important;
             cursor: ew-resize !important;
             pointer-events: auto !important;
             border: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
           }
           [part*="region-handle"]::after {
             content: "";
@@ -141,38 +144,46 @@ const WaveformStage = forwardRef(({ file, isPlaying, speed, loopCount, onTimeUpd
           [part*="region-handle"]:first-child::after {
             content: "A";
             font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 9px;
+            font-weight: 700;
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
+            width: auto;
+            height: auto;
+            padding: 1.5px 6px;
+            border-radius: 4px;
             background-color: #004ac6;
-            top: -20px;
+            position: absolute;
+            top: -22px;
             left: 50%;
             transform: translateX(-50%);
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            pointer-events: none;
           }
           [part*="region-handle"]:last-child::after {
             content: "B";
             font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 9px;
+            font-weight: 700;
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
+            width: auto;
+            height: auto;
+            padding: 1.5px 6px;
+            border-radius: 4px;
             background-color: #004ac6;
-            top: -20px;
+            position: absolute;
+            top: -22px;
             left: 50%;
             transform: translateX(-50%);
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            pointer-events: none;
           }
         `;
         root.appendChild(style);
